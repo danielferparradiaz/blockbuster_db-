@@ -1,24 +1,32 @@
 const { DataTypes } = require("sequelize");
 const bdmysqlNube = require("../database/mySqlConnection");
 
-const Multimedia = bdmysqlNube.define("Multimedia", {
-  idmultimedia: {
+const Heroe = bdmysqlNube.define("Heroe", {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: true // 👈 agregado porque tu DDL tiene AUTO_INCREMENT
   },
   nombre: {
-    type: DataTypes.STRING(25)
+    type: DataTypes.STRING(30),
+    allowNull: false,
+    unique: true // 👈 tu DDL tiene UNIQUE en nombre
   },
-  url: {
+  bio: {
     type: DataTypes.TEXT
   },
-  tipo: {
-    type: DataTypes.STRING(15)
+  img: {
+    type: DataTypes.STRING(250)
+  },
+  aparicion: {
+    type: DataTypes.DATE
+  },
+  casa: {
+    type: DataTypes.STRING(20)
   }
 }, {
-  tableName: "multimedias",
-  timestamps: false
+  tableName: "heroes", // 👈 nombre real de la tabla
+  timestamps: false    // 👈 evita createdAt / updatedAt
 });
 
-module.exports = Multimedia;
+module.exports = Heroe;

@@ -1,6 +1,6 @@
 const { response, request } = require('express')
-const { Heroes } = require('../models/mySqlHeroes.model');
-const { bdmysql,bdmysqlNube } = require('../database/mySqlConnection');
+const Heroes = require('../models/mySqlHeroes.model');
+const { bdmysql, bdmysqlNube } = require('../database/mySqlConnection');
 
 
 //CRUD
@@ -72,12 +72,12 @@ const heroeIdGet = async (req, res = response) => {
 
     }
 
- }
+}
 
 
 //SELECT * FROM heroes
 //WHERE nombre LIKE '%" + termino + "%'" 
-const heroesComoGet = async(req = request, res = response) => {
+const heroesComoGet = async (req = request, res = response) => {
 
     const { termino } = req.params;
 
@@ -91,12 +91,13 @@ const heroesComoGet = async(req = request, res = response) => {
 
 
         res.json({
-            ok:true,
+            ok: true,
             data: results,
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ok:false,
+        res.status(500).json({
+            ok: false,
             msg: 'Hable con el Administrador',
             err: error
 
@@ -108,46 +109,37 @@ const heroesComoGet = async(req = request, res = response) => {
 
 
 const heroesPost = async (req, res = response) => {
-
-    //Desestructuracion de datos del BODY en variables del programa
-    const { nombre, bio, img, aparicion , casa,id} = req.body;
-
-    const heroe = new Heroes({ nombre, bio,img, aparicion, casa });
+    const { nombre, bio, img, aparicion, casa } = req.body;
 
     try {
-
-        const existeHeroe = await Heroes.findOne({ where: { nombre: nombre} });
+        const existeHeroe = await Heroes.findOne({ where: { nombre } });
 
         if (existeHeroe) {
             return res.status(400).json({
-                ok:false,
+                ok: false,
                 msg: 'Ya existe un Heroe llamado: ' + nombre
-            })
+            });
         }
 
-        // Guardar en BD
-        newHeroe = await heroe.save();
+        // Crear en BD directamente
+        const heroe = await Heroes.create({ nombre, bio, img, aparicion, casa });
 
-        //console.log(newHeroe.null);
-        //Ajusta el Id del nuevo registro al Heroe
-        heroe.id = newHeroe.null;
-
-        res.json({ok:true,
-            msg:'Heroe INSERTADO',
-            data:heroe
+        res.json({
+            ok: true,
+            msg: 'Heroe INSERTADO',
+            data: heroe
         });
-
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ok:false,
+        res.status(500).json({
+            ok: false,
             msg: 'Hable con el Administrador',
             err: error
-        })
-
+        });
     }
-
 }
+
 
 
 //UPDATE heroe
@@ -157,8 +149,8 @@ const heroesPost = async (req, res = response) => {
 const heroePut = async (req, res = response) => {
 
     const { id } = req.params;
-    const { body} = req;
-   //const { _id, password, google, correo, ...resto } = req.body;
+    const { body } = req;
+    //const { _id, password, google, correo, ...resto } = req.body;
 
     console.log(id);
     console.log(body);
@@ -169,25 +161,26 @@ const heroePut = async (req, res = response) => {
 
         if (!heroe) {
             return res.status(404).json({
-                ok:false,
+                ok: false,
                 msg: 'No existe un heroe con el id: ' + id
             })
         }
 
         console.log(body)
-       
+
         await heroe.update(body);
 
         res.json({
-            ok:true,
-            msg:"Heroe ACTUALIZADO",
-            data:heroe
+            ok: true,
+            msg: "Heroe ACTUALIZADO",
+            data: heroe
         });
-   
+
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ok:false,
+        res.status(500).json({
+            ok: false,
             msg: 'Hable con el Administrador',
             err: error
         })
@@ -197,18 +190,18 @@ const heroePut = async (req, res = response) => {
 }
 
 const heroeDelete = async (req, res = response) => {
-   
+
     const { id } = req.params;
 
     console.log(id);
- 
+
     try {
 
         const heroe = await Heroes.findByPk(id);
 
         if (!heroe) {
             return res.status(404).json({
-                ok:false,
+                ok: false,
                 msg: 'No existe un heroe con el id: ' + id
             })
         }
@@ -220,15 +213,16 @@ const heroeDelete = async (req, res = response) => {
         await heroe.destroy();
 
         res.json({
-            ok:true,
-            msg:"Heroe ELIMINADO",
-            data:heroe,
+            ok: true,
+            msg: "Heroe ELIMINADO",
+            data: heroe,
         });
-   
+
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ok:false,
+        res.status(500).json({
+            ok: false,
             msg: 'Hable con el Administrador',
             err: error
         })

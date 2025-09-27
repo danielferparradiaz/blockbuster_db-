@@ -7,7 +7,7 @@ const Pelicula = bdmysqlNube.define("Pelicula", {
     primaryKey: true,
     autoIncrement: true
   },
-  titulo: {
+  nombre: {
     type: DataTypes.STRING(100),
     field: "nombre"  
   }
