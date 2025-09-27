@@ -5,19 +5,21 @@ const Protagonista = require("./protagonista.model");
 const MultimediasHeroe = require("./multimediasHeroe.model");
 
 
+// Heroe <-> Multimedia (N:M)
 Heroe.belongsToMany(Multimedia, {
-  through: MultimediasHeroe,
-  as: "multimedias",           
+  through: { model: "multimedias_heroe", timestamps: false },
+  as: "multimedias",             
   foreignKey: "heroes_id",
-  otherKey: "multimedia_id"
+  otherKey: "multimedia_id"       
 });
 
 Multimedia.belongsToMany(Heroe, {
-  through: MultimediasHeroe,
-  as: "heroes",                 
+  through: { model: "multimedias_heroe", timestamps: false },
+  as: "heroes",                  
   foreignKey: "multimedia_id",
   otherKey: "heroes_id"
 });
+
 
 // 🔹 Relación Protagonista <-> Pelicula y Heroe
 Protagonista.belongsTo(Heroe, { foreignKey: "heroes_id" });

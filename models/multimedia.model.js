@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const bdmysqlNube = require("../database/mySqlConnection");
 
 const Multimedia = bdmysqlNube.define("Multimedia", {
-  idmultimedia: {
+  multimedia_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
@@ -20,5 +20,6 @@ const Multimedia = bdmysqlNube.define("Multimedia", {
   tableName: "multimedias",
   timestamps: false
 });
+
 
 module.exports = Multimedia;

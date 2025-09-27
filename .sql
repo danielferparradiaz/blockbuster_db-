@@ -59,11 +59,12 @@ CREATE TABLE usuarios (
 -- Tabla: multimedias
 -- ============================
 CREATE TABLE multimedias (
-    idmultimedia INT AUTO_INCREMENT PRIMARY KEY,
+    multimedia_id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(25),
     url TEXT,
     tipo VARCHAR(15)
 );
+
 
 
 -- ============================
@@ -71,8 +72,8 @@ CREATE TABLE multimedias (
 -- ============================
 CREATE TABLE multimedias_heroe (
     heroes_id INT NOT NULL,
-    idmultimedia INT NOT NULL,
+    multimedia_id INT NOT NULL,
     CONSTRAINT multimedias_heroe_heroes_fk FOREIGN KEY (heroes_id) REFERENCES heroes(id),
-    CONSTRAINT multimedias_heroe_multimedias_fk FOREIGN KEY (idmultimedia) REFERENCES multimedias(idmultimedia),
-    PRIMARY KEY (heroes_id, idmultimedia)
+    CONSTRAINT multimedias_heroe_multimedias_fk FOREIGN KEY (multimedia_id) REFERENCES multimedias(multimedia_id),
+    PRIMARY KEY (heroes_id, multimedia_id)
 );

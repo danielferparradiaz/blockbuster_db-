@@ -9,7 +9,9 @@ const {
   getMultimediaById,
   createMultimedia,
   updateMultimedia,
-  deleteMultimedia
+  deleteMultimedia,
+  asociarMultimediaAHeroe,
+  desasociarMultimediaDeHeroe
 } = require("../controllers/multimedia.controller");
 
 router.get("/", validarJWT, getAllMultimedia);
@@ -17,5 +19,21 @@ router.get("/:id", validarJWT, getMultimediaById);
 router.post("/", validarJWT, esAdminRole, createMultimedia);
 router.put("/:id", validarJWT, esAdminRole, updateMultimedia);
 router.delete("/:id", validarJWT, esAdminRole, deleteMultimedia);
+// ...
+// 🔹 Asociar multimedia a héroe (enviar ids por body)
+router.post(
+  "/asociar",
+  validarJWT,
+  esAdminRole,
+  asociarMultimediaAHeroe
+);
+
+router.post(
+  "/desasociar",
+  validarJWT,
+  esAdminRole,
+  desasociarMultimediaDeHeroe
+);
+
 
 module.exports = router;
