@@ -125,7 +125,8 @@ const getMultimediaByPelicula = async (req, res) => {
               include: [
                 {
                   model: Multimedia,
-                  through: { attributes: [] } // 👈 evita pedir createdAt/updatedAt
+                  as: "multimedias",   // usa el alias que definiste en belongsToMany
+                  through: { attributes: [] }
                 }
               ]
             }
@@ -140,6 +141,7 @@ const getMultimediaByPelicula = async (req, res) => {
     res.status(500).json({ msg: "Error al obtener multimedia de la película" });
   }
 };
+
 
 // 👇 Exportar funciones en CommonJS
 module.exports = {

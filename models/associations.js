@@ -2,17 +2,20 @@ const Heroe = require("./mySqlHeroes.model");
 const Multimedia = require("./multimedia.model");
 const Pelicula = require("./pelicula.model");
 const Protagonista = require("./protagonista.model");
+const MultimediasHeroe = require("./multimediasHeroe.model");
 
-// 🔹 Relación Heroe <-> Multimedia (N:M)
+
 Heroe.belongsToMany(Multimedia, {
-  through: { model: "multimedias_heroe", timestamps: false },
+  through: MultimediasHeroe,
+  as: "multimedias",           
   foreignKey: "heroes_id",
-  otherKey: "idmultimedia"
+  otherKey: "multimedia_id"
 });
 
 Multimedia.belongsToMany(Heroe, {
-  through: { model: "multimedias_heroe", timestamps: false },
-  foreignKey: "idmultimedia",
+  through: MultimediasHeroe,
+  as: "heroes",                 
+  foreignKey: "multimedia_id",
   otherKey: "heroes_id"
 });
 
