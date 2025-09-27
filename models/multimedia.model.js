@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const bdmysqlNube = require("../database/mySqlConnection"); // ✅ ya no uses { bdmysqlNube }
+const bdmysqlNube = require("../database/mySqlConnection");
 
 const Multimedia = bdmysqlNube.define("Multimedia", {
   idmultimedia: {
@@ -21,4 +21,4 @@ const Multimedia = bdmysqlNube.define("Multimedia", {
   timestamps: false
 });
 
-module.exports = Multimedia; // ✅ CommonJS
+module.exports = Multimedia;

@@ -7,16 +7,22 @@ const {
   getPeliculaById,
   createPelicula,
   updatePelicula,
-  deletePelicula
+  deletePelicula,
+  getProtagonistasByPelicula,
+  getMultimediaByPelicula
 } = require("../controllers/peliculas.controller");
 
 const router = Router();
 
-// CRUD Peliculas
+// CRUD Películas
 router.get("/", validarJWT, getAllPeliculas);
 router.get("/:id", validarJWT, getPeliculaById);
 router.post("/", validarJWT, esAdminRole, createPelicula);
 router.put("/:id", validarJWT, esAdminRole, updatePelicula);
 router.delete("/:id", validarJWT, esAdminRole, deletePelicula);
+
+// Extra: obtener protagonistas de una película
+router.get("/:id/multimedia", validarJWT, getMultimediaByPelicula);
+router.get("/:id/protagonistas", validarJWT, getProtagonistasByPelicula);
 
 module.exports = router;

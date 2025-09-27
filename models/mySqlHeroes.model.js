@@ -1,33 +1,24 @@
 const { DataTypes } = require("sequelize");
-const bdmysqlNube = require("../database/mySqlConnection"); // ✅ ya no uses { bdmysqlNube }
+const bdmysqlNube = require("../database/mySqlConnection");
 
-const Heroe = bdmysqlNube.define("Heroe", {
-  id: {
+const Multimedia = bdmysqlNube.define("Multimedia", {
+  idmultimedia: {
     type: DataTypes.INTEGER,
-    primaryKey: true
+    primaryKey: true,
+    autoIncrement: true
   },
   nombre: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: DataTypes.STRING(25)
   },
-  bio: {
-    type: DataTypes.TEXT,
-    allowNull: false
+  url: {
+    type: DataTypes.TEXT
   },
-  img: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  aparicion: {
-    type: DataTypes.DATE
-  },
-  casa: {
-    type: DataTypes.STRING
+  tipo: {
+    type: DataTypes.STRING(15)
   }
 }, {
-  freezeTableName: true,
-  createdAt: false,
-  updatedAt: false
+  tableName: "multimedias",
+  timestamps: false
 });
 
-module.exports = Heroe;
+module.exports = Multimedia;

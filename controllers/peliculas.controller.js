@@ -1,5 +1,4 @@
-const Pelicula = require("../models/Pelicula.model");
-const Protagonista = require("../models/Protagonista.model");
+const { Pelicula, Protagonista, Heroe, Multimedia } = require("../models/associations");
 
 // Obtener todas las películas
 const getAllPeliculas = async (req, res) => {
@@ -93,11 +92,62 @@ const deletePelicula = async (req, res) => {
   }
 };
 
+const getProtagonistasByPelicula = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pelicula = await Pelicula.findByPk(id, {
+      include: [{
+        model: Protagonista,
+        include: [Heroe]   // 👈 Incluye datos del héroe
+      }]
+    });
+
+    if (!pelicula) return res.status(404).json({ error: "Película no encontrada" });
+    return res.json(pelicula);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Error al obtener protagonistas de la película" });
+  }
+};
+
+const getMultimediaByPelicula = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pelicula = await Pelicula.findByPk(id, {
+      include: [
+        {
+          model: Protagonista,
+          include: [
+            {
+              model: Heroe,
+              include: [
+                {
+                  model: Multimedia,
+                  through: { attributes: [] } // 👈 evita pedir createdAt/updatedAt
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    res.json(pelicula);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al obtener multimedia de la película" });
+  }
+};
+
 // 👇 Exportar funciones en CommonJS
 module.exports = {
   getAllPeliculas,
   getPeliculaById,
   createPelicula,
   updatePelicula,
-  deletePelicula
+  deletePelicula,
+  getProtagonistasByPelicula,
+  getMultimediaByPelicula
 };

@@ -64,3 +64,15 @@ CREATE TABLE multimedias (
     url TEXT,
     tipo VARCHAR(15)
 );
+
+
+-- ============================
+-- Tabla: multimedias_heroe
+-- ============================
+CREATE TABLE multimedias_heroe (
+    heroes_id INT NOT NULL,
+    idmultimedia INT NOT NULL,
+    CONSTRAINT multimedias_heroe_heroes_fk FOREIGN KEY (heroes_id) REFERENCES heroes(id),
+    CONSTRAINT multimedias_heroe_multimedias_fk FOREIGN KEY (idmultimedia) REFERENCES multimedias(idmultimedia),
+    PRIMARY KEY (heroes_id, idmultimedia)
+);

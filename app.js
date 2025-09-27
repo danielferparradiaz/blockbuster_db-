@@ -12,7 +12,9 @@ console.log('Corriendo en el puerto 8080');
 
 require('dotenv').config();
 
-const Server = require('./models/server')
+const Server = require('./models/server');
+require("./models/associations");
+
 
 //Instancio la Clase
 const server = new Server();

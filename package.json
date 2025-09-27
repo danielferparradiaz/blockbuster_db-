@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js",
-    "iniciar local": "DB_ENV=local node app.js",
-    "iniciar nube": "DB_ENV=remote node app.js"
+    "local": "DB_ENV=local node app.js",
+    "nube": "DB_ENV=remote node app.js"
   },
   "keywords": [],
   "author": "",
