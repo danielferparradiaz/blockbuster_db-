@@ -23,14 +23,11 @@ const usuariosPost = async (req, res = response) => {
             })
         }
 
-        console.log("Sin encriptar",usuario.password);
-
         //ENCRIPTAR la constraseña
         const salt = bcryptjs.genSaltSync();
         //let unpassword = usuario.password;
         usuario.password = bcryptjs.hashSync(usuario.password, salt);
 
-        console.log("Encriptado",usuario.password);
 
         // Guardar en BD
         newUsuario = await usuario.save();
