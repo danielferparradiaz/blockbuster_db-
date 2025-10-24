@@ -1,25 +1,23 @@
-const { DataTypes } = require("sequelize");
-const bdmysqlNube = require("../database/mySqlConnection");
+const mongoose = require("mongoose");
 
-const Multimedia = bdmysqlNube.define("Multimedia", {
-  multimedia_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
+const MultimediaSchema = new mongoose.Schema(
+  {
+    nombre: { type: String, required: true, maxlength: 50, trim: true },
+    url: { type: String, required: true, trim: true },
+    tipo: { type: String, enum: ["imagen", "video", "audio", "otro"], default: "imagen" },
+
+    // Campo opcional si quieres saber a qué héroe pertenece directamente
+    heroe: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Heroe",
+      required: false
+    }
   },
-  nombre: {
-    type: DataTypes.STRING(25)
-  },
-  url: {
-    type: DataTypes.TEXT
-  },
-  tipo: {
-    type: DataTypes.STRING(15)
+  {
+    collection: "multimedias",
+    versionKey: false,
+    timestamps: true, // Guarda createdAt / updatedAt
   }
-}, {
-  tableName: "multimedias",
-  timestamps: false
-});
+);
 
-
-module.exports = Multimedia;
+module.exports = mongoose.model("Multimedia", MultimediaSchema);

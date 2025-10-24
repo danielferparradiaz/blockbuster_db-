@@ -1,155 +1,122 @@
-const { Usuarios } = require('../models/usuarios.model');
-
 const bcryptjs = require("bcryptjs");
+const Usuario = require("../models/Usuario.model");
 const { generarJWT } = require("../helpers/generar-jwt");
 
-//INSERT - CREATE
-const usuariosPost = async (req, res = response) => {
-
-
-    //Desestructuracion de los Datos, desde el BODY, que es donde estamos pasando la informacion
+// ✅ Crear usuario (POST)
+const usuariosPost = async (req, res) => {
+  try {
     const { nombre, correo, password, img, rol, google } = req.body;
 
-
-    const usuario = new Usuarios({ nombre, correo, password, img, rol, google });
-
-    try {
-       
-        const existeUsuario = await Usuarios.findOne({ where: { correo: correo} });
-
-        if (existeUsuario) {
-            return res.status(400).json({ok:false,
-                msg: 'Ya existe un Usuario con el correo ' + correo
-            })
-        }
-
-        //ENCRIPTAR la constraseña
-        const salt = bcryptjs.genSaltSync();
-        //let unpassword = usuario.password;
-        usuario.password = bcryptjs.hashSync(usuario.password, salt);
-
-
-        // Guardar en BD
-        newUsuario = await usuario.save();
-
-        //console.log(newHeroe.null);
-        //Ajusta el Id del nuevo registro al Usuario
-        usuario.id = newUsuario.null;
-
-        res.json({
-            ok:true,
-            msg:"Usuario CREADO",
-            data:usuario
-        });
-       
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: 'Hable con el Administrador',
-            err: error
-        })
-
+    // Verificar si ya existe el usuario
+    const existeUsuario = await Usuario.findOne({ correo });
+    if (existeUsuario) {
+      return res.status(400).json({
+        ok: false,
+        msg: `Ya existe un usuario con el correo ${correo}`,
+      });
     }
 
-}
+    // Encriptar la contraseña
+    const salt = bcryptjs.genSaltSync();
+    const hashedPassword = bcryptjs.hashSync(password, salt);
 
+    // Crear el nuevo usuario
+    const nuevoUsuario = new Usuario({
+      nombre,
+      correo,
+      password: hashedPassword,
+      img,
+      rol,
+      google,
+    });
 
+    await nuevoUsuario.save();
 
-const login = async (req, res = response) => {
-
-    const { correo, password } = req.body;
-
-    try {
-
-        const usuario = await Usuarios.findOne({ where: { correo: correo} });
-        console.log(usuario);
-       
-        if (!usuario) {
-            return res
-                .status(400)
-                .json({
-                    ok: false,
-                    msg: "Usuario / Password no son correctos - correo: " + correo,
-                });
-        }
-
-        // Verificar si el usuario esta activo
-        if (!usuario.estado) {
-            return res
-                .status(400)
-                .json({
-                    ok: false,
-                    msg: "Usuario / Password no son correctos - estado: false",
-                });
-        }
-
-
-        const validaPassword = bcryptjs.compareSync(password, usuario.password);
-        // Verificar la contraseña
-
-
-        if (!validaPassword) {
-            return res
-                .status(400)
-                .json({
-                    ok: false,
-                    msg: "Usuario / Password no son correctos - password",
-                });
-        }
-
-
-        // Generar el JWT
-        const token = await generarJWT(usuario.id);
-
-
-        res.json({
-            ok: true,
-            msg: "Login OK",
-            usuario,
-            token,
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            ok: false,
-            msg: "Hable con el Administrador...",
-            error: error,
-        });
-    }
+    res.status(201).json({
+      ok: true,
+      msg: "Usuario creado correctamente",
+      data: nuevoUsuario,
+    });
+  } catch (error) {
+    console.error("❌ Error al crear usuario:", error);
+    res.status(500).json({
+      ok: false,
+      msg: "Error interno del servidor",
+      error,
+    });
+  }
 };
 
-//SELECT * FROM usuarios
-const usuariosGet = async (req, res = response) => {
+// ✅ Login de usuario
+const login = async (req, res) => {
+  const { correo, password } = req.body;
 
-
-    try {
-        //select * from usuarios;
-        const unosUsuarios = await Usuarios.findAll();
-
-        res.json({
-            ok: true,
-            data: unosUsuarios
-        });
-
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: 'Hable con el Administrador',
-            err: error
-        })
-
+  try {
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario) {
+      return res.status(400).json({
+        ok: false,
+        msg: `Usuario / Password incorrectos - correo: ${correo}`,
+      });
     }
-}
 
+    // Verificar si el usuario está activo
+    if (!usuario.estado) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Usuario inactivo",
+      });
+    }
+
+    // Verificar contraseña
+    const validaPassword = bcryptjs.compareSync(password, usuario.password);
+    if (!validaPassword) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Usuario / Password incorrectos - contraseña inválida",
+      });
+    }
+
+    // Generar JWT
+    const token = await generarJWT(usuario._id);
+
+    res.json({
+      ok: true,
+      msg: "Login exitoso",
+      usuario,
+      token,
+    });
+  } catch (error) {
+    console.error("❌ Error en login:", error);
+    res.status(500).json({
+      ok: false,
+      msg: "Error interno en login",
+      error,
+    });
+  }
+};
+
+// ✅ Obtener todos los usuarios
+const usuariosGet = async (req, res) => {
+  try {
+    const usuarios = await Usuario.find().sort({ fecha_creacion: -1 });
+
+    res.json({
+      ok: true,
+      data: usuarios,
+    });
+  } catch (error) {
+    console.error("❌ Error al obtener usuarios:", error);
+    res.status(500).json({
+      ok: false,
+      msg: "Error al obtener usuarios",
+      error,
+    });
+  }
+};
 
 module.exports = {
-    usuariosPost,
-    login,
-    usuariosGet
-}
-
-
+  usuariosPost,
+  login,
+  usuariosGet,
+};

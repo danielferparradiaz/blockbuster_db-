@@ -3,6 +3,9 @@ const cors = require('cors')
 
 //const { bdmysql } = require('../database/MariaDbConnection');
 const bdmysqlNube = require("../database/mySqlConnection");
+const connectMongo = require('../database/mongoConnection');
+
+connectMongo();
 
 
 
@@ -44,7 +47,7 @@ class Server {
     async dbConnection() {
         try {
             await bdmysqlNube.authenticate();
-            console.log('Connection OK a MySQL.');
+            // console.log('Connection OK a MySQL.');
         } catch (error) {
             console.error('No se pudo Conectar a la BD MySQL', error);
         }

@@ -1,4 +1,4 @@
-const { Usuarios, } = require("../models/usuarios.model");
+const { Usuarios, } = require("../models/Usuario.model");
 
 const existeEmail = async (correo = "") => {
 

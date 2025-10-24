@@ -1,27 +1,17 @@
-const { DataTypes } = require("sequelize");
-const bdmysqlNube = require("../database/mySqlConnection");
+const mongoose = require("mongoose");
 
-const Protagonista = bdmysqlNube.define("Protagonista", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
+const ProtagonistaSchema = new mongoose.Schema(
+  {
+    papel: { type: String, maxlength: 50 },
+    fecha_participacion: { type: Date },
+    heroe: { type: mongoose.Schema.Types.ObjectId, ref: "Heroe", required: true },
+    pelicula: { type: mongoose.Schema.Types.ObjectId, ref: "Pelicula", required: true }
   },
-  papel: {
-    type: DataTypes.STRING(50)
-  },
-  fecha_participacion: {
-    type: DataTypes.DATE
-  },
-  heroes_id: {
-    type: DataTypes.INTEGER
-  },
-  peliculas_id: {
-    type: DataTypes.INTEGER
+  {
+    collection: "protagonistas",
+    versionKey: false,
+    timestamps: true
   }
-}, {
-  tableName: "protagonistas",
-  timestamps: false
-});
+);
 
-module.exports = Protagonista;
+module.exports = mongoose.model("Protagonista", ProtagonistaSchema);

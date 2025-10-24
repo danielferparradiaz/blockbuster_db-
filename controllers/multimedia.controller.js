@@ -1,128 +1,172 @@
 const Multimedia = require("../models/Multimedia.model");
-const Heroe = require("../models/mySqlHeroes.model");
+const Heroe = require("../models/Heroe.model");
 
-// Obtener todos
+// Obtener todos los registros
 const getAllMultimedia = async (req, res) => {
   try {
-    const data = await Multimedia.findAll();
-    res.json(data);
+    const data = await Multimedia.find().sort({ nombre: 1 });
+    res.json({
+      ok: true,
+      data
+    });
   } catch (error) {
+    console.error("❌ Error al obtener multimedias:", error);
     res.status(500).json({ error: "Error al obtener multimedias" });
   }
 };
 
-// Obtener por id
+// Obtener por ID
 const getMultimediaById = async (req, res) => {
   try {
     const { id } = req.params;
-    const multimedia = await Multimedia.findByPk(id);
-    if (!multimedia) return res.status(404).json({ error: "Multimedia no encontrada" });
-    res.json(multimedia);
+    const multimedia = await Multimedia.findById(id);
+    if (!multimedia)
+      return res.status(404).json({ error: "Multimedia no encontrada" });
+
+    res.json({
+      ok: true,
+      data: multimedia
+    });
   } catch (error) {
+    console.error("❌ Error al obtener multimedia:", error);
     res.status(500).json({ error: "Error al obtener multimedia" });
   }
 };
 
-// Crear
+// Crear nueva multimedia
 const createMultimedia = async (req, res) => {
   try {
     const { nombre, url, tipo } = req.body;
-    const newMultimedia = await Multimedia.create({ nombre, url, tipo });
-    res.status(201).json(newMultimedia);
+
+    const multimedia = new Multimedia({ nombre, url, tipo });
+    await multimedia.save();
+
+    res.status(201).json({
+      ok: true,
+      msg: "✅ Multimedia creada correctamente",
+      data: multimedia
+    });
   } catch (error) {
+    console.error("❌ Error al crear multimedia:", error);
     res.status(500).json({ error: "Error al crear multimedia" });
   }
 };
 
-// Actualizar
+// Actualizar multimedia
 const updateMultimedia = async (req, res) => {
   try {
     const { id } = req.params;
     const { nombre, url, tipo } = req.body;
-    const multimedia = await Multimedia.findByPk(id);
-    if (!multimedia) return res.status(404).json({ error: "Multimedia no encontrada" });
 
-    await multimedia.update({ nombre, url, tipo });
-    res.json(multimedia);
+    const multimediaActualizada = await Multimedia.findByIdAndUpdate(
+      id,
+      { nombre, url, tipo },
+      { new: true }
+    );
+
+    if (!multimediaActualizada)
+      return res.status(404).json({ error: "Multimedia no encontrada" });
+
+    res.json({
+      ok: true,
+      msg: "✅ Multimedia actualizada correctamente",
+      data: multimediaActualizada
+    });
   } catch (error) {
+    console.error("❌ Error al actualizar multimedia:", error);
     res.status(500).json({ error: "Error al actualizar multimedia" });
   }
 };
 
-// Eliminar
+// Eliminar multimedia
 const deleteMultimedia = async (req, res) => {
   try {
     const { id } = req.params;
-    const multimedia = await Multimedia.findByPk(id);
-    if (!multimedia) return res.status(404).json({ error: "Multimedia no encontrada" });
 
-    await multimedia.destroy();
-    res.json({ message: "Multimedia eliminada" });
+    const multimedia = await Multimedia.findByIdAndDelete(id);
+    if (!multimedia)
+      return res.status(404).json({ error: "Multimedia no encontrada" });
+
+    res.json({
+      ok: true,
+      msg: "🗑️ Multimedia eliminada correctamente",
+      data: multimedia
+    });
   } catch (error) {
+    console.error("❌ Error al eliminar multimedia:", error);
     res.status(500).json({ error: "Error al eliminar multimedia" });
   }
 };
 
+// Asociar multimedia a un héroe (embed)
 const asociarMultimediaAHeroe = async (req, res) => {
   try {
-    const { heroes_id, multimedia_id } = req.body;
+    const { heroeId, multimediaId } = req.body;
 
+    const heroe = await Heroe.findById(heroeId);
+    const multimedia = await Multimedia.findById(multimediaId);
 
-    const heroe = await Heroe.findByPk(heroes_id);
+    if (!heroe || !multimedia)
+      return res.status(404).json({ error: "Héroe o multimedia no encontrado" });
 
-    const multimedia = await Multimedia.findByPk(multimedia_id);
+    // Evitar duplicados
+    const yaExiste = heroe.multimedias.some(
+      (m) => m._id.toString() === multimediaId
+    );
+    if (yaExiste)
+      return res.status(400).json({ error: "La multimedia ya está asociada" });
 
+    // Agregar embebido dentro del héroe
+    heroe.multimedias.push({
+      _id: multimedia._id,
+      nombre: multimedia.nombre,
+      url: multimedia.url,
+      tipo: multimedia.tipo
+    });
 
-    if (!heroe || !multimedia) {
-      return res.status(404).json({ error: "Héroe o Multimedia no encontrado" });
-    }
+    await heroe.save();
 
-    await heroe.addMultimedia(multimedia.multimedia_id);
-
-
-    res.json({ message: "Asociación creada correctamente" });
+    res.json({
+      ok: true,
+      msg: "✅ Multimedia asociada correctamente al héroe",
+      data: heroe
+    });
   } catch (error) {
-    console.error("❌ Error en asociarMultimediaAHeroe:", error);
+    console.error("❌ Error al asociar multimedia:", error);
     res.status(500).json({ error: "Error al asociar multimedia con héroe" });
   }
 };
 
-
-// Quitar asociación Multimedia con Héroe
+// Desasociar multimedia de un héroe
 const desasociarMultimediaDeHeroe = async (req, res) => {
   try {
-    const { heroes_id, multimedia_id } = req.body;
+    const { heroeId, multimediaId } = req.body;
 
-    // Validar que existan
-    const heroe = await Heroe.findByPk(heroes_id);
-    const multimedia = await Multimedia.findByPk(multimedia_id);
+    const heroe = await Heroe.findById(heroeId);
+    if (!heroe)
+      return res.status(404).json({ error: "Héroe no encontrado" });
 
-    if (!heroe || !multimedia) {
-      return res.status(404).json({ error: "Héroe o Multimedia no encontrado" });
-    }
+    const inicial = heroe.multimedias.length;
+    heroe.multimedias = heroe.multimedias.filter(
+      (m) => m._id.toString() !== multimediaId
+    );
 
-    // Verificar si ya están asociados (usando el ID)
-    const yaAsociado = await heroe.hasMultimedia(multimedia.multimedia_id);
-    if (!yaAsociado) {
-      return res.status(400).json({ error: "La multimedia NO está asociada a este héroe" });
-    }
+    if (heroe.multimedias.length === inicial)
+      return res.status(400).json({ error: "La multimedia no estaba asociada" });
 
-    // Quitar la asociación
-    await heroe.removeMultimedia(multimedia.multimedia_id);
+    await heroe.save();
 
     res.json({
-      message: "Asociación eliminada correctamente",
-      heroe: heroe.nombre,
-      multimedia: multimedia.nombre
+      ok: true,
+      msg: "❎ Multimedia desasociada correctamente",
+      data: heroe
     });
   } catch (error) {
-    console.error("❌ Error en desasociarMultimediaDeHeroe:", error);
+    console.error("❌ Error al desasociar multimedia:", error);
     res.status(500).json({ error: "Error al desasociar multimedia con héroe" });
   }
 };
 
-
-// 👇 Exportar todo en CommonJS
 module.exports = {
   getAllMultimedia,
   getMultimediaById,
@@ -130,5 +174,5 @@ module.exports = {
   updateMultimedia,
   deleteMultimedia,
   asociarMultimediaAHeroe,
-  desasociarMultimediaDeHeroe
+  desasociarMultimediaDeHeroe,
 };

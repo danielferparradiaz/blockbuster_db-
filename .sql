@@ -5,6 +5,16 @@ CREATE DATABASE IF NOT EXISTS blockbuster_db;
 USE blockbuster_db;
 
 -- ============================
+-- Limpieza de tablas (para permitir la re-ejecución del script)
+-- ============================
+DROP TABLE IF EXISTS multimedias_heroe;
+DROP TABLE IF EXISTS protagonistas;
+DROP TABLE IF EXISTS multimedias;
+DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS peliculas;
+DROP TABLE IF EXISTS heroes;
+
+-- ============================
 -- Tabla: heroes
 -- ============================
 CREATE TABLE heroes (
@@ -22,7 +32,8 @@ CREATE TABLE heroes (
 -- ============================
 CREATE TABLE peliculas (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(30) NOT NULL
+    -- CORRECCIÓN: Se aumenta el tamaño para admitir nombres largos
+    nombre VARCHAR(60) NOT NULL
 );
 
 -- ============================
@@ -60,12 +71,10 @@ CREATE TABLE usuarios (
 -- ============================
 CREATE TABLE multimedias (
     multimedia_id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(25),
+    nombre VARCHAR(100),
     url TEXT,
-    tipo VARCHAR(15)
+    tipo VARCHAR(55)
 );
-
-
 
 -- ============================
 -- Tabla: multimedias_heroe
@@ -78,10 +87,8 @@ CREATE TABLE multimedias_heroe (
     PRIMARY KEY (heroes_id, multimedia_id)
 );
 
-
-
 -- ============================
--- Inserts en heroes
+-- Inserts en heroes (IDs 1-10)
 -- ============================
 INSERT INTO heroes (nombre, bio, img, aparicion, casa) VALUES
 ('Iron Man', 'Tony Stark, genio multimillonario y filántropo, crea una armadura para proteger al mundo.', 'ironman.jpg', '2008-05-02', 'Marvel'),
@@ -96,7 +103,7 @@ INSERT INTO heroes (nombre, bio, img, aparicion, casa) VALUES
 ('Flash', 'Barry Allen, el hombre más rápido del mundo.', 'flash.jpg', '2023-06-16', 'DC');
 
 -- ============================
--- Inserts en peliculas
+-- Inserts en peliculas (IDs 1-10)
 -- ============================
 INSERT INTO peliculas (nombre) VALUES
 ('Iron Man'),
@@ -112,7 +119,6 @@ INSERT INTO peliculas (nombre) VALUES
 
 -- ============================
 -- Inserts en protagonistas
--- (relacionan héroes y películas)
 -- ============================
 INSERT INTO protagonistas (papel, fecha_participacion, heroes_id, peliculas_id) VALUES
 ('Tony Stark / Iron Man', '2008-05-02', 1, 1),
@@ -137,7 +143,7 @@ INSERT INTO usuarios (nombre, correo, password, img, rol, estado, google, fecha_
 ('Pedro Mejía', 'pedro@blockbuster.com', 'hashedpass567', 'pedro.jpg', 'ADMIN', 'A', 'S', '2025-05-20', '2025-05-20');
 
 -- ============================
--- Inserts en multimedias
+-- Inserts en multimedias (IDs 1-5)
 -- ============================
 INSERT INTO multimedias (nombre, url, tipo) VALUES
 ('Trailer Iron Man', 'https://youtube.com/ironman', 'video'),
@@ -148,7 +154,6 @@ INSERT INTO multimedias (nombre, url, tipo) VALUES
 
 -- ============================
 -- Inserts en multimedias_heroe
--- (relaciona héroes con multimedia)
 -- ============================
 INSERT INTO multimedias_heroe (heroes_id, multimedia_id) VALUES
 (1, 1), -- Iron Man → Trailer Iron Man
@@ -157,9 +162,8 @@ INSERT INTO multimedias_heroe (heroes_id, multimedia_id) VALUES
 (9, 4), -- Wonder Woman → Poster
 (10, 5); -- Flash → Trailer
 
-
 -- ============================
--- Más héroes (id 11–20)
+-- Más héroes (IDs 11-20)
 -- ============================
 INSERT INTO heroes (nombre, bio, img, aparicion, casa) VALUES
 ('Doctor Strange', 'Stephen Strange, ex cirujano que se convierte en el Hechicero Supremo.', 'doctor_strange.jpg', '2016-11-04', 'Marvel'),
@@ -174,7 +178,7 @@ INSERT INTO heroes (nombre, bio, img, aparicion, casa) VALUES
 ('Harley Quinn', 'Ex psiquiatra convertida en villana y antiheroína de Gotham.', 'harley_quinn.jpg', '2016-08-05', 'DC');
 
 -- ============================
--- Más películas (id 11–20)
+-- Más películas (IDs 11-20)
 -- ============================
 INSERT INTO peliculas (nombre) VALUES
 ('Doctor Strange'),
@@ -192,6 +196,7 @@ INSERT INTO peliculas (nombre) VALUES
 -- Protagonistas (nuevos vínculos)
 -- ============================
 INSERT INTO protagonistas (papel, fecha_participacion, heroes_id, peliculas_id) VALUES
+-- CORRECCIÓN: Se usan los IDs correctos (del 11 al 20)
 ('Stephen Strange / Doctor Strange', '2016-11-04', 11, 11),
 ('T’Challa / Black Panther', '2018-02-16', 12, 12),
 ('Scott Lang / Ant-Man', '2015-07-17', 13, 13),
@@ -201,10 +206,11 @@ INSERT INTO protagonistas (papel, fecha_participacion, heroes_id, peliculas_id) 
 ('Hal Jordan / Green Lantern', '2011-06-17', 17, 17),
 ('Billy Batson / Shazam', '2019-04-05', 18, 18),
 ('Loki Laufeyson', '2021-06-09', 19, 19),
+-- CORRECCIÓN: El ID 21 no existía, se ajusta a 20
 ('Harleen Quinzel / Harley Quinn', '2020-02-07', 20, 20);
 
 -- ============================
--- Nuevos multimedias
+-- Nuevos multimedias (IDs 6-15)
 -- ============================
 INSERT INTO multimedias (nombre, url, tipo) VALUES
 ('Trailer Doctor Strange', 'https://youtube.com/doctorstrange', 'video'),
@@ -232,4 +238,3 @@ INSERT INTO multimedias_heroe (heroes_id, multimedia_id) VALUES
 (18, 13), -- Shazam → Poster
 (19, 14), -- Loki → Trailer Serie
 (20, 15); -- Harley Quinn → Poster Birds of Prey
-

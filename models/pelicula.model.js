@@ -1,19 +1,11 @@
-const { DataTypes } = require("sequelize");
-const bdmysqlNube = require("../database/mySqlConnection");
+const mongoose = require("mongoose");
 
-const Pelicula = bdmysqlNube.define("Pelicula", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  nombre: {
-    type: DataTypes.STRING(100),
-    field: "nombre"  
-  }
+const PeliculaSchema = new mongoose.Schema({
+  nombre: { type: String, required: true },
 }, {
-  tableName: "peliculas",
+  collection: "peliculas",
+  versionKey: false,
   timestamps: false
 });
 
-module.exports = Pelicula;
+module.exports = mongoose.model("Pelicula", PeliculaSchema);

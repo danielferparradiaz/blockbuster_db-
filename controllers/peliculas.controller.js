@@ -1,151 +1,132 @@
-const { Pelicula, Protagonista, Heroe, Multimedia } = require("../models/associations");
+const Pelicula = require("../models/Pelicula.model");
+const Protagonista = require("../models/Protagonista.model");
+const Heroe = require("../models/Heroe.model");
+const Multimedia = require("../models/Multimedia.model");
 
-// Obtener todas las películas
+// ✅ Obtener todas las películas
 const getAllPeliculas = async (req, res) => {
   try {
-    const peliculas = await Pelicula.findAll({ order: [["id", "ASC"]] });
-    return res.json(peliculas);
+    const peliculas = await Pelicula.find().sort({ _id: 1 });
+    res.json(peliculas);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error al obtener películas" });
+    console.error("❌ Error al obtener películas:", error);
+    res.status(500).json({ error: "Error al obtener películas" });
   }
 };
 
-// Obtener película por id (incluye protagonistas)
+// ✅ Obtener una película por ID (con protagonistas)
 const getPeliculaById = async (req, res) => {
   try {
     const { id } = req.params;
-    const pelicula = await Pelicula.findByPk(id, {
-      include: [Protagonista]
-    });
-    if (!pelicula) return res.status(404).json({ error: "Película no encontrada" });
-    return res.json(pelicula);
+    const pelicula = await Pelicula.findById(id)
+      .populate({
+        path: "protagonistas",
+        populate: { path: "heroe" }
+      });
+
+    if (!pelicula)
+      return res.status(404).json({ error: "Película no encontrada" });
+
+    res.json(pelicula);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error al obtener la película" });
+    console.error("❌ Error al obtener película:", error);
+    res.status(500).json({ error: "Error al obtener la película" });
   }
 };
 
-// Crear nueva película
+// ✅ Crear una nueva película
 const createPelicula = async (req, res) => {
   try {
     const { nombre } = req.body;
-    if (!nombre || !nombre.toString().trim()) {
+
+    if (!nombre || !nombre.trim()) {
       return res.status(400).json({ error: "El campo 'nombre' es requerido" });
     }
-    if (nombre.toString().length > 30) {
-      return res.status(400).json({ error: "El campo 'nombre' no puede tener más de 30 caracteres" });
-    }
 
-    const nueva = await Pelicula.create({ nombre: nombre.toString().trim() });
-    return res.status(201).json(nueva);
+    const nueva = new Pelicula({ nombre: nombre.trim() });
+    await nueva.save();
+
+    res.status(201).json(nueva);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error al crear la película" });
+    console.error("❌ Error al crear película:", error);
+    res.status(500).json({ error: "Error al crear la película" });
   }
 };
 
-// Actualizar película
+// ✅ Actualizar una película
 const updatePelicula = async (req, res) => {
   try {
     const { id } = req.params;
     const { nombre } = req.body;
 
-    const pelicula = await Pelicula.findByPk(id);
+    const pelicula = await Pelicula.findById(id);
     if (!pelicula) return res.status(404).json({ error: "Película no encontrada" });
 
-    if (nombre !== undefined) {
-      if (!nombre.toString().trim()) {
-        return res.status(400).json({ error: "El campo 'nombre' no puede estar vacío" });
-      }
-      if (nombre.toString().length > 30) {
-        return res.status(400).json({ error: "El campo 'nombre' no puede tener más de 30 caracteres" });
-      }
-      pelicula.nombre = nombre.toString().trim();
+    if (nombre) {
+      pelicula.nombre = nombre.trim();
     }
 
     await pelicula.save();
-    return res.json(pelicula);
+    res.json(pelicula);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error al actualizar la película" });
+    console.error("❌ Error al actualizar película:", error);
+    res.status(500).json({ error: "Error al actualizar la película" });
   }
 };
 
-// Eliminar película (verifica protagonistas asociados)
+// ✅ Eliminar película (solo si no tiene protagonistas)
 const deletePelicula = async (req, res) => {
   try {
     const { id } = req.params;
-    const pelicula = await Pelicula.findByPk(id);
-    if (!pelicula) return res.status(404).json({ error: "Película no encontrada" });
 
-    const asociados = await Protagonista.count({ where: { peliculas_id: id } });
-    if (asociados > 0) {
-      return res.status(400).json({ error: "No se puede eliminar: existen protagonistas asociados" });
+    const protagonistas = await Protagonista.countDocuments({ pelicula: id });
+    if (protagonistas > 0) {
+      return res.status(400).json({
+        error: "No se puede eliminar: existen protagonistas asociados"
+      });
     }
 
-    await pelicula.destroy();
-    return res.json({ message: "Película eliminada" });
+    await Pelicula.findByIdAndDelete(id);
+    res.json({ message: "Película eliminada correctamente" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error al eliminar la película" });
+    console.error("❌ Error al eliminar película:", error);
+    res.status(500).json({ error: "Error al eliminar la película" });
   }
 };
 
+// ✅ Obtener protagonistas de una película
 const getProtagonistasByPelicula = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const pelicula = await Pelicula.findByPk(id, {
-      include: [{
-        model: Protagonista,
-        include: [Heroe]   // 👈 Incluye datos del héroe
-      }]
-    });
+    const protagonistas = await Protagonista.find({ pelicula: id })
+      .populate("heroe");
 
-    if (!pelicula) return res.status(404).json({ error: "Película no encontrada" });
-    return res.json(pelicula);
+    res.json(protagonistas);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error al obtener protagonistas de la película" });
+    console.error("❌ Error al obtener protagonistas:", error);
+    res.status(500).json({ error: "Error al obtener protagonistas" });
   }
 };
 
+// ✅ Obtener multimedias de una película (profundizando)
 const getMultimediaByPelicula = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const pelicula = await Pelicula.findByPk(id, {
-      include: [
-        {
-          model: Protagonista,
-          include: [
-            {
-              model: Heroe,
-              include: [
-                {
-                  model: Multimedia,
-                  as: "multimedias",  // 👈 alias debe coincidir
-                  through: { attributes: [] }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    });
+    const protagonistas = await Protagonista.find({ pelicula: id })
+      .populate({
+        path: "heroe",
+        populate: { path: "multimedias" }
+      });
 
-    if (!pelicula) return res.status(404).json({ error: "Película no encontrada" });
-    res.json(pelicula);
+    res.json({ pelicula_id: id, protagonistas });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Error al obtener multimedia de la película" });
+    console.error("❌ Error al obtener multimedia:", error);
+    res.status(500).json({ error: "Error al obtener multimedia de la película" });
   }
 };
 
-
-
-// 👇 Exportar funciones en CommonJS
 module.exports = {
   getAllPeliculas,
   getPeliculaById,

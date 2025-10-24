@@ -1,19 +1,12 @@
-// models/multimediasHeroe.model.js
-const { DataTypes } = require("sequelize");
-const bdmysqlNube = require("../database/mySqlConnection");
+const mongoose = require("mongoose");
 
-const MultimediasHeroe = bdmysqlNube.define("multimedias_heroe", {
-  heroes_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true
-  },
-  multimedia_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true
-  }
+const MultimediasHeroeSchema = new mongoose.Schema({
+  heroe_id: { type: mongoose.Schema.Types.ObjectId, ref: "Heroe" },
+  multimedia_id: { type: mongoose.Schema.Types.ObjectId, ref: "Multimedia" },
 }, {
-  tableName: "multimedias_heroe",
+  collection: "multimedias_heroe",
+  versionKey: false,
   timestamps: false
 });
 
-module.exports = MultimediasHeroe;
+module.exports = mongoose.model("MultimediasHeroe", MultimediasHeroeSchema);
