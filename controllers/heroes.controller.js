@@ -2,15 +2,6 @@ const { response, request } = require('express')
 const Heroes = require('../models/mySqlHeroes.model');
 const { bdmysql, bdmysqlNube } = require('../database/mySqlConnection');
 
-
-//CRUD
-// Create/INSERT/POST - OK
-
-// Retrieve/SELECT/GET - OK (3) 
-
-// Update/UPDATE/PUT - 
-// Delete/DELETE/DELETE
-
 //JSON
 
 //SELECT * FROM heroes
